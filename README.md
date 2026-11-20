@@ -40,6 +40,19 @@ habitos_gamificado/
     └── test_banco.py
 ```
 
+## Menu
+
+A barra de menu no topo da janela dá acesso a todos os modelos e funcionalidades:
+
+| Menu | Opções | Modelo |
+|---|---|---|
+| **Arquivo** | Sair | |
+| **Hábitos** | Novo hábito, Salvar alteração, Concluir selecionado, Excluir selecionado | `Habito` (`HabitoDiario`, `HabitoSemanal`) |
+| **Perfil** | Ver progresso, Mudar nome | `Usuario` |
+| **Histórico** | Ver conclusões | `Historico`, `RegistroConclusao` |
+| **Recompensas** | Ver recompensas | `Recompensa` |
+| **Ajuda** | Como funciona, Sobre | |
+
 ## Casos de uso
 
 | Caso de uso | Onde está |
@@ -47,6 +60,9 @@ habitos_gamificado/
 | UC01 Gerenciar Hábitos (incluir, alterar, excluir) | `App.adicionar`, `App.editar`, `App.excluir` |
 | UC02 Registrar Conclusão Diária | `App.concluir` → `Usuario.concluir` |
 | UC03 Visualizar Progresso | `App.abrir_progresso` (nível, barra de XP, ofensiva, gráfico, recompensas) |
+| Ver histórico de conclusões | `App.abrir_historico` |
+| Ver recompensas | `App.abrir_recompensas` |
+| Mudar nome do usuário | `App.mudar_nome` → `Usuario.mudar_nome` |
 
 ## Regras de negócio
 
@@ -105,6 +121,7 @@ classDiagram
         +historico
         +adicionar_habito(habito)
         +remover_habito(habito)
+        +mudar_nome(novo_nome)
         +xp_para_proximo_nivel()
         +concluir(habito, hoje)
         +verificar_level_up()
@@ -141,11 +158,17 @@ classDiagram
         +banco
         +usuario
         +catalogo
+        +criar_menu()
+        +novo_habito()
         +adicionar()
         +editar()
         +excluir()
         +concluir()
         +abrir_progresso()
+        +mudar_nome()
+        +abrir_historico()
+        +abrir_recompensas()
+        +mostrar_ajuda()
     }
 
     Habito <|-- HabitoDiario : herança

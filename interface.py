@@ -30,12 +30,57 @@ class App:
         self.janela.title("Hábitos Gamificados")
         estilo.aplicar_estilo(self.janela)
 
+        self.criar_menu()
         self.criar_cabecalho()
         self.criar_lista()
         self.criar_formulario()
         self.atualizar_tela()
 
     # ---------- montagem da tela ----------
+
+    def criar_menu(self):
+        # cada menu dá acesso a um modelo do projeto
+        barra = tk.Menu(self.janela)
+
+        # tearoff=0 tira a linha pontilhada do topo de cada menu
+        menu_arquivo = tk.Menu(barra, tearoff=0)
+        menu_arquivo.add_command(label="Sair", command=self.janela.destroy)
+        barra.add_cascade(label="Arquivo", menu=menu_arquivo)
+
+        menu_habitos = tk.Menu(barra, tearoff=0)  # modelo Habito
+        menu_habitos.add_command(label="Novo hábito", command=self.novo_habito)
+        menu_habitos.add_command(label="Salvar alteração", command=self.editar)
+        menu_habitos.add_separator()
+        menu_habitos.add_command(label="Concluir selecionado", command=self.concluir)
+        menu_habitos.add_command(label="Excluir selecionado", command=self.excluir)
+        barra.add_cascade(label="Hábitos", menu=menu_habitos)
+
+        menu_perfil = tk.Menu(barra, tearoff=0)  # modelo Usuario
+        menu_perfil.add_command(label="Ver progresso", command=self.abrir_progresso)
+        menu_perfil.add_command(label="Mudar nome", command=self.mudar_nome)
+        barra.add_cascade(label="Perfil", menu=menu_perfil)
+
+        menu_historico = tk.Menu(barra, tearoff=0)  # modelos Historico e RegistroConclusao
+        menu_historico.add_command(label="Ver conclusões", command=self.abrir_historico)
+        barra.add_cascade(label="Histórico", menu=menu_historico)
+
+        menu_recompensas = tk.Menu(barra, tearoff=0)  # modelo Recompensa
+        menu_recompensas.add_command(label="Ver recompensas", command=self.abrir_recompensas)
+        barra.add_cascade(label="Recompensas", menu=menu_recompensas)
+
+        menu_ajuda = tk.Menu(barra, tearoff=0)
+        menu_ajuda.add_command(label="Como funciona", command=self.mostrar_ajuda)
+        menu_ajuda.add_command(label="Sobre", command=self.mostrar_sobre)
+        barra.add_cascade(label="Ajuda", menu=menu_ajuda)
+
+        self.janela.config(menu=barra)
+
+    def criar_janela(self, titulo):
+        # janela secundária usada pelo progresso, histórico e recompensas
+        janela = tk.Toplevel(self.janela)
+        janela.title(titulo)
+        janela.configure(bg=estilo.COR_FUNDO)
+        return janela
 
     def criar_cabecalho(self):
         topo = tk.Frame(self.janela, bg=estilo.COR_PRIMARIA, padx=25, pady=14)
@@ -196,6 +241,10 @@ class App:
 
     # ---------- UC01: Gerenciar Hábitos ----------
 
+    def novo_habito(self):
+        self.limpar_formulario()
+        self.entrada_nome.focus()
+
     def adicionar(self):
         dados = self.ler_formulario()
         if dados is None:
@@ -261,9 +310,7 @@ class App:
         limite = self.usuario.xp_para_proximo_nivel()
         historico = self.usuario.historico
 
-        janela = tk.Toplevel(self.janela)
-        janela.title("Meu progresso")
-        janela.configure(bg=estilo.COR_FUNDO)
+        janela = self.criar_janela("Meu progresso")
 
         # topo com nome, nível e barra de XP
         topo = tk.Frame(janela, bg=estilo.COR_PRIMARIA, padx=20, pady=14)
@@ -307,19 +354,10 @@ class App:
             grafico.create_text(x + 17, 126, text=dia.strftime("%d/%m"),
                                 font=(estilo.FONTE, 8), fill=estilo.COR_TEXTO_CLARO)
 
-        # recompensas: desbloqueadas em dourado, bloqueadas em cinza
         cartao = estilo.criar_cartao(janela)
         cartao.pack(fill="both", expand=True, padx=20, pady=12)
         estilo.criar_titulo(cartao, "Recompensas").pack(anchor="w", pady=(0, 8))
-        for recompensa in self.catalogo:
-            if recompensa in self.usuario.recompensas:
-                texto = f"★  {recompensa.nome}"
-                fundo, cor_texto = "#FFF4CC", "#8A6A00"
-            else:
-                texto = f"☆  {recompensa.nome}  (desbloqueia no nível {recompensa.nivel_necessario})"
-                fundo, cor_texto = "#F0EEF5", estilo.COR_TEXTO_CLARO
-            tk.Label(cartao, text=texto, bg=fundo, fg=cor_texto, font=(estilo.FONTE, 10),
-                     anchor="w", padx=10, pady=4).pack(fill="x", pady=2)
+        self.mostrar_recompensas(cartao)
 
     def criar_numero(self, pai, valor, legenda):
         cartao = estilo.criar_cartao(pai)
@@ -328,3 +366,92 @@ class App:
                  font=(estilo.FONTE, 20, "bold")).pack()
         tk.Label(cartao, text=legenda, bg=estilo.COR_CARTAO, fg=estilo.COR_TEXTO_CLARO,
                  font=(estilo.FONTE, 9)).pack()
+
+    def mudar_nome(self):
+        novo_nome = simpledialog.askstring("Mudar nome", "Digite o novo nome:",
+                                           initialvalue=self.usuario.nome, parent=self.janela)
+        if novo_nome is None:
+            return  # clicou em Cancelar
+        if self.usuario.mudar_nome(novo_nome):
+            self.banco.salvar_usuario(self.usuario)
+            self.atualizar_tela()
+        else:
+            messagebox.showwarning("Atenção", "O nome não pode ficar vazio.")
+
+    # ---------- Histórico ----------
+
+    def abrir_historico(self):
+        historico = self.usuario.historico
+
+        janela = self.criar_janela("Histórico")
+        cartao = estilo.criar_cartao(janela)
+        cartao.pack(fill="both", expand=True, padx=20, pady=20)
+        estilo.criar_titulo(cartao, "Histórico de conclusões").pack(anchor="w", pady=(0, 10))
+
+        colunas = ("data", "habito", "xp")
+        tabela = ttk.Treeview(cartao, columns=colunas, show="headings", height=10)
+        tabela.heading("data", text="Data")
+        tabela.heading("habito", text="Hábito", anchor="w")
+        tabela.heading("xp", text="XP")
+        tabela.column("data", width=110, anchor="center")
+        tabela.column("habito", width=240, anchor="w")
+        tabela.column("xp", width=80, anchor="center")
+        tabela.pack(fill="both", expand=True)
+
+        # reversed: mostra da conclusão mais recente para a mais antiga
+        for registro in reversed(historico.registros):
+            tabela.insert("", tk.END, values=(
+                registro.data.strftime("%d/%m/%Y"),
+                registro.nome_habito,
+                f"+{registro.xp}",
+            ))
+
+        if historico.registros:
+            resumo = f"{len(historico.registros)} conclusões, {historico.total_xp()} XP ganhos no total"
+        else:
+            resumo = "Nenhuma conclusão ainda. Conclua um hábito para ele aparecer aqui."
+        tk.Label(cartao, text=resumo, bg=estilo.COR_CARTAO, fg=estilo.COR_TEXTO_CLARO,
+                 font=(estilo.FONTE, 9)).pack(anchor="w", pady=(10, 0))
+
+    # ---------- Recompensas ----------
+
+    def abrir_recompensas(self):
+        janela = self.criar_janela("Recompensas")
+        cartao = estilo.criar_cartao(janela)
+        cartao.pack(fill="both", expand=True, padx=20, pady=20)
+        estilo.criar_titulo(cartao, "Recompensas").pack(anchor="w")
+        tk.Label(cartao, text=f"Você está no nível {self.usuario.nivel}. Suba de nível para desbloquear mais!",
+                 bg=estilo.COR_CARTAO, fg=estilo.COR_TEXTO_CLARO,
+                 font=(estilo.FONTE, 9)).pack(anchor="w", pady=(0, 8))
+        self.mostrar_recompensas(cartao)
+
+    def mostrar_recompensas(self, pai):
+        # desbloqueadas em dourado, bloqueadas em cinza
+        for recompensa in self.catalogo:
+            if recompensa in self.usuario.recompensas:
+                texto = f"★  {recompensa.nome}"
+                fundo, cor_texto = "#FFF4CC", "#8A6A00"
+            else:
+                texto = f"☆  {recompensa.nome}  (desbloqueia no nível {recompensa.nivel_necessario})"
+                fundo, cor_texto = "#F0EEF5", estilo.COR_TEXTO_CLARO
+            tk.Label(pai, text=texto, bg=fundo, fg=cor_texto, font=(estilo.FONTE, 10),
+                     anchor="w", padx=10, pady=4).pack(fill="x", pady=2)
+
+    # ---------- Ajuda ----------
+
+    def mostrar_ajuda(self):
+        messagebox.showinfo("Como funciona",
+                            "1. Cadastre seus hábitos (diários ou semanais).\n"
+                            "2. Selecione um hábito e clique em Concluir para ganhar XP.\n"
+                            "3. Junte XP para subir de nível e desbloquear recompensas.\n\n"
+                            "XP: Fácil = 10, Médio = 20, Difícil = 30.\n"
+                            "O hábito semanal vale o dobro.\n"
+                            "Para subir do nível N para o N+1 são necessários N x 100 XP.\n"
+                            "Cada hábito só gera XP uma vez por ciclo (dia ou semana).")
+
+    def mostrar_sobre(self):
+        messagebox.showinfo("Sobre",
+                            "Hábitos Gamificados\n\n"
+                            "Projeto da disciplina de Orientação a Objetos\n"
+                            "Engenharia de Software\n\n"
+                            "Henrique Pereira e Eduardo Mariz de Sousa")

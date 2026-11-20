@@ -19,6 +19,13 @@ class Usuario:
     def remover_habito(self, habito):
         self.habitos.remove(habito)
 
+    def mudar_nome(self, novo_nome):
+        novo_nome = novo_nome.strip()
+        if novo_nome == "":
+            return False  # não deixa o nome ficar vazio
+        self.nome = novo_nome
+        return True
+
     def xp_para_proximo_nivel(self):
         return self.nivel * XP_POR_NIVEL
 

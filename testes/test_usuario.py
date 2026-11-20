@@ -43,6 +43,14 @@ class TestUsuario(unittest.TestCase):
         self.usuario.remover_habito(habito)
         self.assertNotIn(habito, self.usuario.habitos)
 
+    def test_mudar_nome(self):
+        self.assertTrue(self.usuario.mudar_nome("  Henrique Pereira  "))
+        self.assertEqual(self.usuario.nome, "Henrique Pereira")
+
+    def test_mudar_nome_vazio_nao_muda(self):
+        self.assertFalse(self.usuario.mudar_nome("   "))
+        self.assertEqual(self.usuario.nome, "Henrique")
+
     def test_desbloquear_recompensas(self):
         catalogo = catalogo_padrao()
         self.usuario.nivel = 3

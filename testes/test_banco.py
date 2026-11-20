@@ -34,6 +34,12 @@ class TestBancoDados(unittest.TestCase):
         self.assertEqual(carregado.habitos[0].ultima_conclusao, hoje)
         self.assertEqual(len(carregado.historico.registros), 1)
 
+    def test_mudar_nome_fica_salvo(self):
+        usuario = self.banco.criar_usuario("Henrique")
+        usuario.mudar_nome("Eduardo")
+        self.banco.salvar_usuario(usuario)
+        self.assertEqual(self.banco.carregar_usuario().nome, "Eduardo")
+
     def test_excluir_habito(self):
         self.banco.criar_usuario("Henrique")
         habito = HabitoDiario("Ler", 1)
