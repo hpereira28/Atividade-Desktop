@@ -20,10 +20,7 @@ class App:
 
         self.usuario = self.banco.carregar_usuario()
         if self.usuario is None:
-            nome = simpledialog.askstring("Bem-vindo", "Qual é o seu nome?", parent=janela)
-            if not nome:
-                nome = "Jogador"
-            self.usuario = self.banco.criar_usuario(nome.strip())
+            self.usuario = self.banco.criar_usuario(self.pedir_nome())
         self.usuario.desbloquear_recompensas(self.catalogo)
 
         # sem geometry(): a janela se ajusta sozinha ao tamanho do conteúdo
@@ -44,6 +41,8 @@ class App:
 
         # tearoff=0 tira a linha pontilhada do topo de cada menu
         menu_arquivo = tk.Menu(barra, tearoff=0)
+        menu_arquivo.add_command(label="Recomeçar do zero", command=self.recomecar)
+        menu_arquivo.add_separator()
         menu_arquivo.add_command(label="Sair", command=self.janela.destroy)
         barra.add_cascade(label="Arquivo", menu=menu_arquivo)
 
@@ -74,6 +73,23 @@ class App:
         barra.add_cascade(label="Ajuda", menu=menu_ajuda)
 
         self.janela.config(menu=barra)
+
+    def pedir_nome(self):
+        nome = simpledialog.askstring("Bem-vindo", "Qual é o seu nome?", parent=self.janela)
+        if not nome or nome.strip() == "":
+            return "Jogador"
+        return nome.strip()
+
+    def recomecar(self):
+        if not messagebox.askyesno("Recomeçar do zero",
+                                   "Isso apaga todos os hábitos, o histórico e o progresso do banco de dados.\n"
+                                   "Deseja continuar?"):
+            return
+        self.banco.apagar_tudo()
+        self.usuario = self.banco.criar_usuario(self.pedir_nome())
+        self.usuario.desbloquear_recompensas(self.catalogo)
+        self.limpar_formulario()
+        self.atualizar_tela()
 
     def criar_janela(self, titulo):
         # janela secundária usada pelo progresso, histórico e recompensas

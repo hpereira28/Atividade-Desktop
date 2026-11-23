@@ -113,6 +113,14 @@ class BancoDados:
         self.salvar_usuario(usuario)
         self.atualizar_habito(habito)
 
+    def apagar_tudo(self):
+        """Apaga todos os dados das três tabelas (usado em "Recomeçar do zero")."""
+        cursor = self.conexao.cursor()
+        cursor.execute("DELETE FROM historico")
+        cursor.execute("DELETE FROM habito")
+        cursor.execute("DELETE FROM usuario")
+        self.conexao.commit()
+
     def data_texto(self, data):
         if data is None:
             return None

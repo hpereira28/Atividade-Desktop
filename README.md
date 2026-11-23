@@ -29,6 +29,7 @@ habitos_gamificado/
 ├── interface.py         # classe App (telas em Tkinter)
 ├── estilo.py            # cores, fontes e componentes visuais (botões, cartões)
 ├── banco.py             # classe BancoDados (SQLite)
+├── consultar_banco.py   # mostra no terminal o que está salvo no banco
 ├── modelos/
 │   ├── habito.py        # Habito (abstrata), HabitoDiario, HabitoSemanal
 │   ├── usuario.py       # Usuario
@@ -46,12 +47,31 @@ A barra de menu no topo da janela dá acesso a todos os modelos e funcionalidade
 
 | Menu | Opções | Modelo |
 |---|---|---|
-| **Arquivo** | Sair | |
+| **Arquivo** | Recomeçar do zero, Sair | apaga os dados do banco |
 | **Hábitos** | Novo hábito, Salvar alteração, Concluir selecionado, Excluir selecionado | `Habito` (`HabitoDiario`, `HabitoSemanal`) |
 | **Perfil** | Ver progresso, Mudar nome | `Usuario` |
 | **Histórico** | Ver conclusões | `Historico`, `RegistroConclusao` |
 | **Recompensas** | Ver recompensas | `Recompensa` |
 | **Ajuda** | Como funciona, Sobre | |
+
+## Banco de dados (SQLite)
+
+Tudo fica salvo no arquivo `habitos.db`, criado na primeira vez que o app abre. Fechando e abrindo de novo,
+o usuário, os hábitos e o histórico continuam lá. Quem conversa com o banco é a classe `BancoDados` (`banco.py`).
+
+| Tabela | Colunas | Operações (`BancoDados`) |
+|---|---|---|
+| `usuario` | id, nome, xp, nivel | `criar_usuario` (INSERT), `carregar_usuario` (SELECT), `salvar_usuario` (UPDATE) |
+| `habito` | id, nome, dificuldade, frequencia, ultima_conclusao | `inserir_habito` (INSERT), `atualizar_habito` (UPDATE), `excluir_habito` (DELETE) |
+| `historico` | id, nome_habito, xp, data | `salvar_conclusao` (INSERT) |
+
+`apagar_tudo` (DELETE nas três tabelas) é usado pelo menu **Arquivo > Recomeçar do zero**.
+
+Para ver no terminal o que está salvo no banco:
+
+```bash
+python consultar_banco.py
+```
 
 ## Casos de uso
 
@@ -152,6 +172,7 @@ classDiagram
         +atualizar_habito(habito)
         +excluir_habito(habito)
         +salvar_conclusao(usuario, habito)
+        +apagar_tudo()
     }
     class App {
         +janela
@@ -159,6 +180,7 @@ classDiagram
         +usuario
         +catalogo
         +criar_menu()
+        +recomecar()
         +novo_habito()
         +adicionar()
         +editar()
