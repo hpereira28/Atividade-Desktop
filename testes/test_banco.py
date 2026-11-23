@@ -40,6 +40,23 @@ class TestBancoDados(unittest.TestCase):
         self.banco.salvar_usuario(usuario)
         self.assertEqual(self.banco.carregar_usuario().nome, "Eduardo")
 
+    def test_apagar_tudo(self):
+        usuario = self.banco.criar_usuario("Henrique")
+        habito = HabitoDiario("Ler", 1)
+        self.banco.inserir_habito(habito)
+        usuario.concluir(habito, date(2026, 11, 23))
+        self.banco.salvar_conclusao(usuario, habito)
+
+        self.banco.apagar_tudo()
+        self.assertIsNone(self.banco.carregar_usuario())
+
+        # depois de apagar, um usuário novo começa sem hábitos e sem histórico
+        novo = self.banco.criar_usuario("Eduardo")
+        carregado = self.banco.carregar_usuario()
+        self.assertEqual(carregado.nome, "Eduardo")
+        self.assertEqual(carregado.habitos, [])
+        self.assertEqual(carregado.historico.registros, [])
+
     def test_excluir_habito(self):
         self.banco.criar_usuario("Henrique")
         habito = HabitoDiario("Ler", 1)
