@@ -455,19 +455,74 @@ class App:
 
     # ---------- Ajuda ----------
 
+    def criar_topo(self, janela, titulo, subtitulo):
+        # faixa roxa no topo das janelas de ajuda
+        topo = tk.Frame(janela, bg=estilo.COR_PRIMARIA, padx=20, pady=14)
+        topo.pack(fill="x")
+        tk.Label(topo, text=titulo, bg=estilo.COR_PRIMARIA, fg="white",
+                 font=(estilo.FONTE, 16, "bold")).pack(anchor="w")
+        tk.Label(topo, text=subtitulo, bg=estilo.COR_PRIMARIA, fg=estilo.COR_PRIMARIA_CLARA,
+                 font=(estilo.FONTE, 9)).pack(anchor="w")
+
     def mostrar_ajuda(self):
-        messagebox.showinfo("Como funciona",
-                            "1. Cadastre seus hábitos (diários ou semanais).\n"
-                            "2. Selecione um hábito e clique em Concluir para ganhar XP.\n"
-                            "3. Junte XP para subir de nível e desbloquear recompensas.\n\n"
-                            "XP: Fácil = 10, Médio = 20, Difícil = 30.\n"
-                            "O hábito semanal vale o dobro.\n"
-                            "Para subir do nível N para o N+1 são necessários N x 100 XP.\n"
-                            "Cada hábito só gera XP uma vez por ciclo (dia ou semana).")
+        janela = self.criar_janela("Como funciona")
+        janela.transient(self.janela)  # fica sempre na frente da janela principal
+        self.criar_topo(janela, "Como funciona", "Transforme seus hábitos em XP")
+
+        # passo a passo com números em círculos
+        cartao = estilo.criar_cartao(janela)
+        cartao.pack(fill="x", padx=20, pady=(16, 8))
+        estilo.criar_titulo(cartao, "Passo a passo").pack(anchor="w", pady=(0, 8))
+        passos = ["Cadastre seus hábitos (diários ou semanais).",
+                  "Selecione um hábito e clique em Concluir para ganhar XP.",
+                  "Junte XP para subir de nível e desbloquear recompensas."]
+        for numero, texto in enumerate(passos, start=1):
+            linha = tk.Frame(cartao, bg=estilo.COR_CARTAO)
+            linha.pack(anchor="w", pady=3)
+            tk.Label(linha, text=str(numero), bg=estilo.COR_PRIMARIA, fg="white", width=2,
+                     font=(estilo.FONTE, 10, "bold")).pack(side="left")
+            tk.Label(linha, text=texto, bg=estilo.COR_CARTAO, fg=estilo.COR_TEXTO,
+                     font=(estilo.FONTE, 10)).pack(side="left", padx=8)
+
+        # tabela de XP montada com grid
+        cartao = estilo.criar_cartao(janela)
+        cartao.pack(fill="x", padx=20, pady=8)
+        estilo.criar_titulo(cartao, "Quanto XP cada hábito vale").grid(row=0, column=0, columnspan=3,
+                                                                        sticky="w", pady=(0, 8))
+        tabela = [("Dificuldade", "Diário", "Semanal"),
+                  ("Fácil", "10 XP", "20 XP"),
+                  ("Médio", "20 XP", "40 XP"),
+                  ("Difícil", "30 XP", "60 XP")]
+        for linha, valores in enumerate(tabela, start=1):
+            for coluna, valor in enumerate(valores):
+                if linha == 1:  # primeira linha é o cabeçalho
+                    fundo, cor, fonte = estilo.COR_PRIMARIA_CLARA, estilo.COR_PRIMARIA, (estilo.FONTE, 10, "bold")
+                else:
+                    fundo, cor, fonte = estilo.COR_CARTAO, estilo.COR_TEXTO, (estilo.FONTE, 10)
+                tk.Label(cartao, text=valor, bg=fundo, fg=cor, font=fonte,
+                         width=12, pady=4).grid(row=linha, column=coluna, padx=1, pady=1)
+        tk.Label(cartao, text="Para subir do nível N para o N+1 são necessários N x 100 XP.\n"
+                              "Cada hábito só gera XP uma vez por ciclo (dia ou semana).",
+                 bg=estilo.COR_CARTAO, fg=estilo.COR_TEXTO_CLARO, font=(estilo.FONTE, 9),
+                 justify="left").grid(row=5, column=0, columnspan=3, sticky="w", pady=(8, 0))
+
+        estilo.criar_botao(janela, "Entendi!", estilo.COR_PRIMARIA,
+                           janela.destroy).pack(pady=(8, 16))
 
     def mostrar_sobre(self):
-        messagebox.showinfo("Sobre",
-                            "Hábitos Gamificados\n\n"
-                            "Projeto da disciplina de Orientação a Objetos\n"
-                            "Engenharia de Software\n\n"
-                            "Henrique Pereira e Eduardo Mariz de Sousa")
+        janela = self.criar_janela("Sobre")
+        janela.transient(self.janela)
+        self.criar_topo(janela, "Hábitos Gamificados", "Versão Desk App IV")
+
+        cartao = estilo.criar_cartao(janela)
+        cartao.pack(fill="x", padx=20, pady=16)
+        textos = [("Projeto da disciplina de Orientação a Objetos", estilo.COR_TEXTO, "bold"),
+                  ("Engenharia de Software", estilo.COR_TEXTO_CLARO, "normal"),
+                  ("", estilo.COR_TEXTO, "normal"),
+                  ("Feito em Python com Tkinter e SQLite", estilo.COR_TEXTO_CLARO, "normal"),
+                  ("Henrique Pereira e Eduardo Mariz de Sousa", estilo.COR_PRIMARIA, "bold")]
+        for texto, cor, peso in textos:
+            tk.Label(cartao, text=texto, bg=estilo.COR_CARTAO, fg=cor,
+                     font=(estilo.FONTE, 10, peso)).pack(anchor="w")
+
+        estilo.criar_botao(janela, "Fechar", estilo.COR_NEUTRA, janela.destroy).pack(pady=(0, 16))

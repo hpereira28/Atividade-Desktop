@@ -49,11 +49,24 @@ def aplicar_estilo(janela):
              background=[("active", COR_PRIMARIA_CLARA)])
 
 
+def escurecer(cor, fator=0.82):
+    """Recebe uma cor no formato "#RRGGBB" e devolve a mesma cor um pouco mais escura."""
+    vermelho = int(cor[1:3], 16)
+    verde = int(cor[3:5], 16)
+    azul = int(cor[5:7], 16)
+    return "#{:02X}{:02X}{:02X}".format(int(vermelho * fator), int(verde * fator), int(azul * fator))
+
+
 def criar_botao(pai, texto, cor, comando):
-    return tk.Button(pai, text=texto, command=comando, bg=cor, fg="white",
-                     activebackground=cor, activeforeground="white",
-                     font=(FONTE, 10, "bold"), relief="flat", borderwidth=0,
-                     padx=14, pady=6, cursor="hand2")
+    cor_escura = escurecer(cor)
+    botao = tk.Button(pai, text=texto, command=comando, bg=cor, fg="white",
+                      activebackground=cor_escura, activeforeground="white",
+                      font=(FONTE, 10, "bold"), relief="flat", borderwidth=0,
+                      padx=14, pady=6, cursor="hand2")
+    # efeito ao passar o mouse: o botão escurece e volta ao normal quando o mouse sai
+    botao.bind("<Enter>", lambda evento: botao.config(bg=cor_escura))
+    botao.bind("<Leave>", lambda evento: botao.config(bg=cor))
+    return botao
 
 
 def criar_cartao(pai):

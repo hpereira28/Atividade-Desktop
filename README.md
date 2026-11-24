@@ -38,8 +38,32 @@ habitos_gamificado/
 └── testes/
     ├── test_habito.py
     ├── test_usuario.py
-    └── test_banco.py
+    ├── test_banco.py
+    └── test_estilo.py
 ```
+
+## Interface gráfica
+
+Feita com **Tkinter**. Todas as cores, fontes e componentes visuais ficam no arquivo `estilo.py`.
+
+**Janelas**
+
+| Janela | Como abrir |
+|---|---|
+| Principal (cabeçalho com nível e XP, lista de hábitos e formulário) | abre ao rodar `python main.py` |
+| Meu progresso (números, gráfico da semana e recompensas) | botão **Ver progresso** ou **Perfil > Ver progresso** |
+| Histórico de conclusões | **Histórico > Ver conclusões** |
+| Recompensas | **Recompensas > Ver recompensas** |
+| Como funciona (passo a passo e tabela de XP) | **Ajuda > Como funciona** |
+| Sobre | **Ajuda > Sobre** |
+
+**Estilos personalizados** (`estilo.py`)
+
+- Paleta própria: roxo, dourado, verde e vermelho (`COR_PRIMARIA`, `COR_DESTAQUE`...) e fonte Segoe UI.
+- `aplicar_estilo()`: muda o tema dos componentes `ttk`, como a tabela, os campos e a barra de XP dourada.
+- `criar_botao()`: botões coloridos, sem borda, com cursor de "mãozinha" e **efeito ao passar o mouse**
+  (a cor escurece com a função `escurecer()`).
+- `criar_cartao()` e `criar_titulo()`: os "cartões" brancos com borda fina usados em todas as janelas.
 
 ## Menu
 
